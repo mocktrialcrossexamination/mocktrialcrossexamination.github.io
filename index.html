@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>List Processor</title>
+    <link rel="stylesheet" type="text/css" href="/static/styles.css">
+    <style>
+        .section {
+            margin-bottom: 20px;
+        }
+
+        .section h2 {
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        .toggle-button {
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <h1>Cross Examination</h1>
+    <form id="listForm">
+        <label for="list1">List 1:</label><br>
+        <input type="text" id="list1" name="list1"><br>
+        <label for="list2">List 2:</label><br>
+        <input type="text" id="list2" name="list2"><br>
+        <label for="list3">List 3:</label><br>
+        <input type="text" id="list3" name="list3"><br><br>
+        <button type="button" onclick="processLists()">Process Lists</button>
+    </form>
+    
+    <div class="section">
+        <h2>Grouped Result</h2>
+        <button class="toggle-button" onclick="toggleSection('groupedResult')">Toggle Section</button>
+        <pre id="groupedResult"></pre>
+    </div>
+    
+    <div class="section">
+        <h2>Global Missing</h2>
+        <button class="toggle-button" onclick="toggleSection('globalMissing')">Toggle Section</button>
+        <pre id="globalMissing"></pre>
+    </div>
+    
+    <div class="section">
+        <h2>Global Not First</h2>
+        <button class="toggle-button" onclick="toggleSection('globalNotFirst')">Toggle Section</button>
+        <pre id="globalNotFirst"></pre>
+    </div>
+    
+    <div class="section">
+        <h2>Global High</h2>
+        <button class="toggle-button" onclick="toggleSection('globalHigh')">Toggle Section</button>
+        <pre id="globalHigh"></pre>
+    </div>
+    
+    <div class="section">
+        <h2>Global All</h2>
+        <button class="toggle-button" onclick="toggleSection('globalAll')">Toggle Section</button>
+        <pre id="globalAll"></pre>
+    </div>
+
+    <script>
+        function processLists() {
+            const list1 = document.getElementById('list1').value;
+            const list2 = document.getElementById('list2').value;
+            const list3 = document.getElementById('list3').value;
+
+            fetch('/process_lists', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({list1, list2, list3})
+            })
+            .then(response => response.text())
+            .then(result => {
+                // Parse the result into separate parts
+                const [groupedResult, globalMissing, globalNotFirst, globalHigh, globalAll] = result.split('\n\n');
+
+                // Update the corresponding text boxes
+                document.getElementById('groupedResult').innerText = groupedResult;
+                document.getElementById('globalMissing').innerText = globalMissing;
+                document.getElementById('globalNotFirst').innerText = globalNotFirst;
+                document.getElementById('globalHigh').innerText = globalHigh;
+                document.getElementById('globalAll').innerText = globalAll;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        function toggleSection(sectionId) {
+            var section = document.getElementById(sectionId);
+            section.style.display = section.style.display === 'none' ? 'block' : 'none';
+        }
+    </script>
+</body>
+</html>
